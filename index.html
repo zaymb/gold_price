@@ -3,161 +3,663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实时金价监控</title>
+    <title>AURUM | Precious Metals</title>
+
+    <!-- Distinctive Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-light: #F5D76E;
+            --gold-dark: #996515;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --silver-primary: #C0C0C0;
+            --silver-light: #E8E8E8;
+            --bg-deep: #0A0A0A;
+            --bg-card: #111111;
+            --text-cream: #FAF3E0;
+            --text-muted: rgba(250, 243, 224, 0.6);
+            --accent-line: rgba(212, 175, 55, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #1a1a1a;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
         }
-        
-        .price-dashboard {
-            background: linear-gradient(135deg, #292929 0%, #000000 100%);
-            border-radius: 20px;
-            padding: 25px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 100px,
+                    rgba(212, 175, 55, 0.02) 100px,
+                    rgba(212, 175, 55, 0.02) 101px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 100px,
+                    rgba(212, 175, 55, 0.02) 100px,
+                    rgba(212, 175, 55, 0.02) 101px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating Gold Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
         }
-        
-        .dashboard-title {
-            margin: 0;
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--gold-primary);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float-particle 8s infinite;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        /* Art Deco Frame */
+        .deco-frame {
+            position: relative;
+            background: linear-gradient(180deg, var(--bg-card) 0%, #080808 100%);
+            padding: 3px;
+            clip-path: polygon(
+                0 30px, 30px 0, calc(100% - 30px) 0, 100% 30px,
+                100% calc(100% - 30px), calc(100% - 30px) 100%, 30px 100%, 0 calc(100% - 30px)
+            );
+        }
+
+        .deco-frame::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark), var(--gold-primary));
+            clip-path: polygon(
+                0 30px, 30px 0, calc(100% - 30px) 0, 100% 30px,
+                100% calc(100% - 30px), calc(100% - 30px) 100%, 30px 100%, 0 calc(100% - 30px)
+            );
+            z-index: -1;
+        }
+
+        .dashboard {
+            background: linear-gradient(180deg, #141414 0%, #0A0A0A 100%);
+            padding: 40px 35px;
+            clip-path: polygon(
+                0 28px, 28px 0, calc(100% - 28px) 0, 100% 28px,
+                100% calc(100% - 28px), calc(100% - 28px) 100%, 28px 100%, 0 calc(100% - 28px)
+            );
+        }
+
+        /* Header */
+        .header {
             text-align: center;
-            font-size: 20px;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 35px;
+            position: relative;
         }
-        
-        .price-grid {
+
+        .brand {
+            font-family: 'Cinzel', serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 12px;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px var(--gold-glow);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            margin-top: 8px;
+        }
+
+        /* Decorative Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+        }
+
+        .divider-diamond {
+            width: 10px;
+            height: 10px;
+            background: var(--gold-primary);
+            transform: rotate(45deg);
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* Price Display */
+        .price-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .price-block {
+            position: relative;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--accent-line);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .price-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 40%, rgba(212, 175, 55, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .price-block:hover::before {
+            opacity: 1;
+        }
+
+        .price-block:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .price-block.gold-block {
+            border-left: 3px solid var(--gold-primary);
+        }
+
+        .price-block.silver-block {
+            border-left: 3px solid var(--silver-primary);
+        }
+
+        .metal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 15px;
+        }
+
+        .metal-name {
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: var(--text-cream);
+        }
+
+        .metal-code {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 300;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .currency-symbol {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 300;
+            opacity: 0.7;
+        }
+
+        .price-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .gold-block .price-value,
+        .gold-block .currency-symbol {
+            color: var(--gold-light);
+        }
+
+        .silver-block .price-value,
+        .silver-block .currency-symbol {
+            color: var(--silver-light);
+        }
+
+        /* Metrics Row */
+        .metrics-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+            margin-top: 25px;
         }
-        
-        .price-card {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px 15px;
+
+        .metric-card {
+            padding: 18px;
+            background: rgba(212, 175, 55, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.15);
             text-align: center;
-        }
-        
-        .price-label {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .price-value {
-            font-size: 26px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .gold-price {
-            color: #FFD700;
-        }
-        
-        .silver-price {
-            color: #C0C0C0;
-        }
-        
-        .update-info {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        .ratio-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .ratio-badge {
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-        
-        .refresh-btn {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #292929 0%, #000000 100%);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(64,64,64, 0.4);
             transition: all 0.3s;
-            letter-spacing: 2px;
         }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 181, 32, 0.6);
-            color: rgba(245, 181, 32, 1);
+
+        .metric-card:hover {
+            background: rgba(212, 175, 55, 0.06);
+            border-color: rgba(212, 175, 55, 0.3);
         }
-        
-        .error-msg {
-            color: #ff6b6b;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        .loading {
-            color: #888;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        .auto-refresh-info {
+
+        .metric-label {
             font-size: 10px;
-            opacity: 0.5;
-            margin-top: 8px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
-        
-        .countdown {
-            color: #FFD700;
+
+        .metric-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--gold-light);
+        }
+
+        .metric-value .unit {
+            font-size: 14px;
+            font-weight: 300;
+            opacity: 0.7;
+        }
+
+        /* Footer Info */
+        .footer-info {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .source-info {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .time-display {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Refresh Section */
+        .refresh-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .countdown-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .countdown-ring {
+            position: relative;
+            width: 36px;
+            height: 36px;
+        }
+
+        .countdown-ring svg {
+            transform: rotate(-90deg);
+            width: 36px;
+            height: 36px;
+        }
+
+        .countdown-ring circle {
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .countdown-ring .bg {
+            stroke: rgba(212, 175, 55, 0.15);
+        }
+
+        .countdown-ring .progress {
+            stroke: var(--gold-primary);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .countdown-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gold-light);
+        }
+
+        .refresh-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            padding: 12px 28px;
+            background: transparent;
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .refresh-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+            transition: left 0.5s;
+        }
+
+        .refresh-btn:hover::before {
+            left: 100%;
+        }
+
+        .refresh-btn:hover {
+            background: var(--gold-primary);
+            color: var(--bg-deep);
+            box-shadow: 0 0 30px var(--gold-glow);
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .loading-spinner::before,
+        .loading-spinner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid transparent;
+            border-top-color: var(--gold-primary);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .loading-spinner::after {
+            inset: 8px;
+            border-top-color: var(--gold-light);
+            animation-duration: 1s;
+            animation-direction: reverse;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-style: italic;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+        }
+
+        /* Error State */
+        .error-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .error-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        /* Entry Animations */
+        .dashboard[data-loaded="true"] .brand {
+            animation: fadeSlideDown 0.8s ease-out both;
+        }
+
+        .dashboard[data-loaded="true"] .tagline {
+            animation: fadeSlideDown 0.8s ease-out 0.1s both;
+        }
+
+        .dashboard[data-loaded="true"] .divider {
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .dashboard[data-loaded="true"] .price-block:nth-child(1) {
+            animation: fadeSlideUp 0.6s ease-out 0.3s both;
+        }
+
+        .dashboard[data-loaded="true"] .price-block:nth-child(2) {
+            animation: fadeSlideUp 0.6s ease-out 0.4s both;
+        }
+
+        .dashboard[data-loaded="true"] .metrics-row {
+            animation: fadeSlideUp 0.6s ease-out 0.5s both;
+        }
+
+        .dashboard[data-loaded="true"] .footer-info {
+            animation: fadeIn 0.6s ease-out 0.6s both;
+        }
+
+        .dashboard[data-loaded="true"] .refresh-section {
+            animation: fadeSlideUp 0.6s ease-out 0.7s both;
+        }
+
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .dashboard {
+                padding: 30px 20px;
+            }
+
+            .brand {
+                font-size: 32px;
+                letter-spacing: 8px;
+            }
+
+            .price-value {
+                font-size: 38px;
+            }
+
+            .currency-symbol {
+                font-size: 22px;
+            }
+
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+
+            .refresh-section {
+                flex-direction: column;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div class="loading">加载中...</div>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="main-container">
+        <div class="deco-frame">
+            <div class="dashboard" id="dashboard">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Retrieving Market Data</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu1vBnmyShB6xihlZsOnHQCTBBaD38Ay7pk-3_M7YkJB4ql6NeMhxKDRHRdYBf9Di4tQSzpsYhrktv/pub?gid=0&single=true&output=csv';
-        
-        const REFRESH_INTERVAL = 60; // 秒
+
+        const REFRESH_INTERVAL = 60;
         let countdown = REFRESH_INTERVAL;
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
+        }
 
         async function fetchPrices() {
             try {
-                // 加时间戳防缓存
                 const url = SHEET_CSV_URL + '&_t=' + Date.now();
                 const response = await fetch(url);
                 const csvText = await response.text();
-                
+
                 const rows = csvText
                     .split('\n')
                     .map(row => row.trim())
@@ -173,9 +675,9 @@
                 const silverPrice = parseFloat(silverRaw);
                 const rmbPrice    = parseFloat(rmbRaw);
 
-                if (isNaN(goldPrice))   throw new Error('gold price NaN: '   + goldRaw);
-                if (isNaN(silverPrice)) throw new Error('silver price NaN: ' + silverRaw);
-                if (isNaN(rmbPrice))    throw new Error('rmb price NaN: '    + rmbRaw);
+                if (isNaN(goldPrice))   throw new Error('gold price NaN');
+                if (isNaN(silverPrice)) throw new Error('silver price NaN');
+                if (isNaN(rmbPrice))    throw new Error('rmb price NaN');
 
                 return {
                     gold: goldPrice,
@@ -185,55 +687,110 @@
                     ratio: goldPrice / silverPrice
                 };
             } catch (error) {
-                console.error('获取失败:', error);
+                console.error('Fetch failed:', error);
                 return null;
             }
         }
 
         function render(prices) {
-            const container = document.getElementById('container');
-            
+            const dashboard = document.getElementById('dashboard');
+
             if (prices) {
-                container.innerHTML = `
-                    <div class="price-dashboard">
-                        <h2 class="dashboard-title">PRECIOUS METAL PRICE</h2>
-                        
-                        <div class="price-grid">
-                            <div class="price-card">
-                                <div class="price-label">GOLD XAU/USD</div>
-                                <div class="price-value gold-price">$${prices.gold.toFixed(3)}</div>
+                const circumference = 2 * Math.PI * 15;
+                const offset = circumference - (countdown / REFRESH_INTERVAL) * circumference;
+
+                dashboard.innerHTML = `
+                    <header class="header">
+                        <h1 class="brand">AURUM</h1>
+                        <p class="tagline">Precious Metals Exchange</p>
+                    </header>
+
+                    <div class="divider">
+                        <div class="divider-line"></div>
+                        <div class="divider-diamond"></div>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-block gold-block">
+                            <div class="metal-header">
+                                <span class="metal-name">GOLD</span>
+                                <span class="metal-code">XAU / USD</span>
                             </div>
-                            
-                            <div class="price-card">
-                                <div class="price-label">SILVER XAG/USD</div>
-                                <div class="price-value silver-price">$${prices.silver.toFixed(3)}</div>
+                            <div class="price-display">
+                                <span class="currency-symbol">$</span>
+                                <span class="price-value">${prices.gold.toFixed(2)}</span>
                             </div>
                         </div>
-                        
-                        <div class="update-info">
-                            <div class="ratio-row">
-                                <div class="ratio-badge">RMB/g: ￥${prices.rmb.toFixed(3)}</div>
-                                <div class="ratio-badge">GSR: ${prices.ratio.toFixed(3)}</div>
+
+                        <div class="price-block silver-block">
+                            <div class="metal-header">
+                                <span class="metal-name">SILVER</span>
+                                <span class="metal-code">XAG / USD</span>
                             </div>
-                            <div style="margin-top:10px;">
-                                Swiss Quote | ${prices.time}
-                            </div>
-                            <div class="auto-refresh-info">
-                                自动刷新: <span id="countdown" class="countdown">${countdown}</span>s
+                            <div class="price-display">
+                                <span class="currency-symbol">$</span>
+                                <span class="price-value">${prices.silver.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <button class="refresh-btn" onclick="manualRefresh()">REFRESH</button>
+
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <div class="metric-label">RMB PER GRAM</div>
+                            <div class="metric-value">
+                                <span class="unit">¥</span>${prices.rmb.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">GOLD/SILVER</div>
+                            <div class="metric-value">${prices.ratio.toFixed(1)}</div>
+                        </div>
+                    </div>
+
+                    <div class="footer-info">
+                        <div class="source-info">Swiss Quote Market Data</div>
+                        <div class="time-display">${prices.time}</div>
+                    </div>
+
+                    <div class="refresh-section">
+                        <div class="countdown-display">
+                            <div class="countdown-ring">
+                                <svg viewBox="0 0 36 36">
+                                    <circle class="bg" cx="18" cy="18" r="15"></circle>
+                                    <circle class="progress" cx="18" cy="18" r="15"
+                                        stroke-dasharray="${circumference}"
+                                        stroke-dashoffset="${offset}">
+                                    </circle>
+                                </svg>
+                                <span class="countdown-number" id="countdown">${countdown}</span>
+                            </div>
+                        </div>
+                        <button class="refresh-btn" onclick="manualRefresh()">REFRESH</button>
+                    </div>
                 `;
+
+                dashboard.setAttribute('data-loaded', 'true');
             } else {
-                container.innerHTML = `
-                    <div class="error-msg">
-                        <p>无法连接到价格数据</p>
-                        <button class="refresh-btn" onclick="loadData()">重试</button>
+                dashboard.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">◇</div>
+                        <p class="error-text">Unable to connect to market data</p>
+                        <button class="refresh-btn" onclick="loadData()">TRY AGAIN</button>
                     </div>
                 `;
             }
+        }
+
+        function updateCountdownDisplay() {
+            const circumference = 2 * Math.PI * 15;
+            const offset = circumference - (countdown / REFRESH_INTERVAL) * circumference;
+
+            const countdownEl = document.getElementById('countdown');
+            const progressEl = document.querySelector('.countdown-ring .progress');
+
+            if (countdownEl) countdownEl.textContent = countdown;
+            if (progressEl) progressEl.style.strokeDashoffset = offset;
         }
 
         async function loadData() {
@@ -243,24 +800,29 @@
         }
 
         function manualRefresh() {
-            document.getElementById('container').innerHTML = '<div class="loading">加载中...</div>';
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Retrieving Market Data</div>
+                </div>
+            `;
+            dashboard.removeAttribute('data-loaded');
             loadData();
         }
 
         function updateCountdown() {
             countdown--;
-            const el = document.getElementById('countdown');
-            if (el) el.textContent = countdown;
-            
+            updateCountdownDisplay();
+
             if (countdown <= 0) {
                 loadData();
             }
         }
 
-        // 初始加载
+        // Initialize
+        createParticles();
         loadData();
-        
-        // 每秒更新倒计时
         setInterval(updateCountdown, 1000);
     </script>
 </body>
